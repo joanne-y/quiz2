@@ -5,6 +5,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
+
+	"quiz2.joanneyong.net/internal/data"
 )
 
 // createSchoolHandler for the "POST /v1/entries" endpoint
@@ -20,6 +23,22 @@ func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request)
 		http.NotFound(w, r)
 		return
 	}
-	// Display the entry id
-	fmt.Fprintf(w, "show the details for entry %d\n", id)
+	// Create a new instance of the Entry struct containing the ID we extracted
+	// from our URL and some sample data
+	entry := data.Entry{
+		ID:        id,
+		CreatedAt: time.Now(),
+		Name:      "Apple Tree",
+		Level:     "High School",
+		Contact:   "Anna Smith",
+		Phone:     "601-4411",
+		Address:   "14 Apple street",
+		Mode:      []string{"blended", "online"},
+		Version:   1,
+	}
+	err = app.writeJSON(w, http.StatusOK, entry, nil)
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
 }
