@@ -5,13 +5,12 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"quiz2.joanneyong.net/internal/data"
 	"quiz2.joanneyong.net/internal/validator"
 )
 
-// createSchoolHandler for the "POST /v1/entries" endpoint
+// createEntryHandler for the "POST /v1/entries" endpoint
 func (app *application) createEntryHandler(w http.ResponseWriter, r *http.Request) {
 	// Our target decode destination
 	var input struct {
@@ -56,29 +55,16 @@ func (app *application) createEntryHandler(w http.ResponseWriter, r *http.Reques
 	fmt.Fprintf(w, "%+v\n", input)
 }
 
-// showSchoolHnadler for the "GET v1/entries/:id" endpoint
-func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request) {
-	// Use the "ParamsFromContext()" function to get the request context as a slice
+// showRandomStringHandler for the "GET /v1/random/:id" endpoint
+func (app *application) showRandomStringHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		app.notFoundResponse(w, r)
 		return
 	}
-	// Create a new instance of the Entry struct containing the ID we extracted
-	// from our URL and some sample data
-	entry := data.Entry{
-		ID:        id,
-		CreatedAt: time.Now(),
-		Name:      "Apple Tree",
-		Level:     "High School",
-		Contact:   "Anna Smith",
-		Phone:     "601-4411",
-		Address:   "14 Apple street",
-		Mode:      []string{"blended", "online"},
-		Version:   1,
-	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"entry": entry}, nil)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-	}
+	// Display the random string
+	//Converts the int64 id to an int
+	num := int(id)
+	fmt.Fprintf(w, "show random string for %d\n", num)
+	fmt.Fprintln(w, app.Tools.generateRandomString(num))
 }
