@@ -3,6 +3,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -12,7 +13,25 @@ import (
 
 // createSchoolHandler for the "POST /v1/entries" endpoint
 func (app *application) createEntryHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new entry..")
+	// Our target decode destination
+	var input struct {
+		Name    string   `json:"name"`
+		Level   string   `json:"level"`
+		Contact string   `json:"contact"`
+		Phone   string   `json:"phone"`
+		Email   string   `json:"email"`
+		Website string   `json:"website"`
+		Address string   `json:"address"`
+		Mode    []string `json:"mode"`
+	}
+	// Initialize a new json.Decoder instance
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	// Display the request
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 // showSchoolHnadler for the "GET v1/entries/:id" endpoint
@@ -20,7 +39,7 @@ func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request)
 	// Use the "ParamsFromContext()" function to get the request context as a slice
 	id, err := app.readIDParam(r)
 	if err != nil {
-		http.NotFound(w, r)
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 	// Create a new instance of the Entry struct containing the ID we extracted
@@ -36,9 +55,8 @@ func (app *application) showEntryHandler(w http.ResponseWriter, r *http.Request)
 		Mode:      []string{"blended", "online"},
 		Version:   1,
 	}
-	err = app.writeJSON(w, http.StatusOK, entry, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"entry": entry}, nil)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }
