@@ -1,0 +1,18 @@
+/*Rules for sizing the icon*/
+.material-icons.md-100 { font-size: 100px; }
+
+.header {
+    background-color: #ffffff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.header h1 {
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0;
+}
+
+
